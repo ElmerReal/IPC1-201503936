@@ -22,6 +22,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import hilos.*;
 
 /**
  *
@@ -34,7 +35,6 @@ public class ventana extends JFrame {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         crearObjetosInternos();
     }
-    producto[] inventario = new producto[50];
 
     public void crearObjetosInternos() {
         JPanel pnlPrincipal = new JPanel(new FlowLayout());
@@ -42,18 +42,11 @@ public class ventana extends JFrame {
 
         //------------- Botones ----------------------
         JButton btnCargarDatos = utiles.CrearBoton("Cargar", 200, 35);
-        JButton btnVerInventario = utiles.CrearBoton("Ver Inventario", 200, 35);
-        JButton btnDetalle = utiles.CrearBoton("Ver detalle producto", 200, 35);
+        JButton btnCancelar = utiles.CrearBoton("Cancelar", 200, 35);
         //------------ Combo box ---------------------------
-        JComboBox cmbDatos = new JComboBox();
-        cmbDatos.addItem(new producto("Producto prueba", "1000.0"));
-        cmbDatos.setRenderer(new MyObjectListCellRenderer());
-
+        JComboBox cmbDatos = utiles.CrearComboBox(200, 35);
         //-------------- TXT Carga -----------------
-        JTextArea txtCarga = new JTextArea("");
-        txtCarga.setPreferredSize(new Dimension(200, 50));
-        txtCarga.setLocation(0, 0);
-        pnlPrincipal.add(txtCarga);
+        JTextArea txtCarga = utiles.CrearTextArea("", 200, 50);
         //---------------------------------------------
         //-------------- Buton cargar Datos -----------------
 
@@ -61,116 +54,35 @@ public class ventana extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, txtCarga.getText());
-                String info = txtCarga.getText();
-                String[] datos = info.split("\n");
-                for (String dato : datos) {
-                    System.out.println(dato);
-                    String[] infoActividad = dato.split(",");
-                    switch (infoActividad[0]) {
-                        case "PRODUCTO":
-                            System.out.println("agregarlo al arreglo de repuestos");
-                            agregarProducto(new producto(infoActividad[1], infoActividad[2]));
-                            break;
-                    }
-                }
+                      String info = txtCarga.getText();
+                      utiles.cargarProductos(info);
             }
         });
-        //---------------------------------------------
-        //-------------- Buton VER INVENTARIO -----------------
-
-        //---------------------------------------------
-        //-------------- Combo Box Datos -----------------
-        btnVerInventario.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                imprimirProducto();
-                ActualizarComboBox(cmbDatos);
-            }
-        });
-        btnDetalle.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                consultarPrecio(cmbDatos);
-            }
-        });
-        cmbDatos.setPreferredSize(new Dimension(200, 35));
-        cmbDatos.setLocation(0, 0);
+        
+     
         //----------------------------------------------
+        pnlPrincipal.add(txtCarga);
         pnlPrincipal.add(btnCargarDatos);
-        pnlPrincipal.add(btnVerInventario);
         pnlPrincipal.add(cmbDatos);
-        pnlPrincipal.add(btnDetalle);
+        btnCancelar.addActionListener(new ActionListener() {
 
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                accion_btnCancelar(e);
+            }
+        });
+        pnlPrincipal.add(btnCancelar);
         this.add(pnlPrincipal);
-    }
-
-    public void agregarProducto(producto obj) {
-        for (int i = 0; i < 50; i++) {
-            if (inventario[i] == null) {
-                inventario[i] = obj;
-                return;
-            }
-        }
-    }
-
-    public void imprimirProducto() {
-        System.out.println("-------------------------");
-        for (int i = 0; i < 50; i++) {
-            if (inventario[i] != null) {
-                inventario[i].imprimir();
-            }
-        }
-        System.out.println("--------------------------");
-    }
-
-    public void ActualizarComboBox(JComboBox combo) {
-        combo.removeAllItems();
-        for (int i = 0; i < 50; i++) {
-            if (inventario[i] != null) {
-                combo.addItem(inventario[i].resumen());
-            }
-        }
-    }
-
-    public void consultarPrecio(JComboBox combo) {
-    //    JOptionPane.showMessageDialog(null, "El producto vale " + obtenerPrecio_nombre(combo.getSelectedItem().toString()));
-        JOptionPane.showMessageDialog(null, "El producto vale " + ((producto)combo.getSelectedItem()).getValor());
+        proceso_referescar_inventario proceso = new proceso_referescar_inventario(cmbDatos);
+        Thread hilo = new Thread(proceso);
+        hilo.start();
 
     }
 
-    public double obtenerPrecio_correlativo(int no) {
-        return inventario[no].getValor();
+    public void accion_btnCancelar(ActionEvent e) {
+        this.dispose();
     }
-
-    public double obtenerPrecio_nombre(String nombre) {
-        for (int i = 0; i < 50; i++) {
-            if (inventario[i] != null) {
-                producto temporal = inventario[i];
-                if (temporal.getNombre().equals(nombre)) {
-                    return temporal.getValor();
-                }
-            }
-        }
-        return 0.0;
-    }
-
-     //---
-    class MyObjectListCellRenderer extends DefaultListCellRenderer {
-
-        public Component getListCellRendererComponent(
-                JList list,
-                Object value,
-                int index,
-                boolean isSelected,
-                boolean cellHasFocus) {
-            if (value instanceof producto) {
-                value = ((producto) value).resumen();
-            }
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            return this;
-        }
-    }
+    
+  
+ 
 }

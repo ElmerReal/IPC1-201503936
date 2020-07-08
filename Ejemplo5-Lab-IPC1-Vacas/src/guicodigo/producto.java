@@ -47,4 +47,9 @@ public class producto {
         return nombre;
     }
     
+    @Override
+    public String toString(){
+        return this.nombre+" ("+this.valor+")";
+    }
+    
 }
