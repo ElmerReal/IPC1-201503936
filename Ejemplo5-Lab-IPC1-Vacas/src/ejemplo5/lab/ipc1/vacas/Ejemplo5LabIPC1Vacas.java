@@ -29,8 +29,11 @@ public class Ejemplo5LabIPC1Vacas {
         } catch (IOException ex) {
             Logger.getLogger(Ejemplo5LabIPC1Vacas.class.getName()).log(Level.SEVERE, null, ex);
         }
-        menu_principal ventana = new menu_principal();
-        ventana.show();
+//        menu_principal ventana = new menu_principal();
+//        ventana.show();
+        
+        tablero ejemplo = new tablero();
+        ejemplo.show();
 
     }
 
